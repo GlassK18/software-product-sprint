@@ -20,42 +20,35 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse; 
 import java.util.ArrayList;
+import java.util.Arrays; 
 import java.util.List;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-    private List<String> messages;
 
   @Override
-  public void init(){
-      messages = new ArrayList<>();
-      messages.add("Random message 1: Doctor Who is a good show.");
-      messages.add("Random message 2: Frozen II is the best Disney sequel.");
-      messages.add("Random message 3: David Tennant is iconic.");
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    // Get the input from the form.
+    String text = getParameter(request, "text-input", "");
+
+    // Break the text into individual words.
+    String[] words = text.split("\\s*,\\s*");
+
+    // Respond with the result.
+    response.setContentType("text/html;");
+    response.getWriter().println(Arrays.toString(words));
   }
   
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String json = createJSON();
-    response.setContentType("application/json;");
-    response.getWriter().println(json);
-  }
-
-  private String createJSON(){
-      String json = "{\"messages\":[";
-      json += "\"";
-      json += messages.get(0);
-      json += "\"";
-      json += ", ";
-      json += "\"";
-      json += messages.get(1);
-      json +="\"";
-      json += ", ";
-      json += "\"";
-      json += messages.get(2);
-      json +="\"";
-      json += "]}";
-      return json;
+  /**
+   * @return the request parameter, or the default value if the parameter
+   *         was not specified by the client
+   */
+  private String getParameter(HttpServletRequest request, String name, String defaultValue) {
+    String value = request.getParameter(name);
+    if (value == null) {
+      return defaultValue;
+    }
+    return value;
   }
 }
