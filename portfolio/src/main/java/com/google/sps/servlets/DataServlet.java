@@ -18,15 +18,44 @@ import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse; 
+import java.util.ArrayList;
+import java.util.List;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+    private List<String> messages;
 
   @Override
+  public void init(){
+      messages = new ArrayList<>();
+      messages.add("Random message 1: Doctor Who is a good show.");
+      messages.add("Random message 2: Frozen II is the best Disney sequel.");
+      messages.add("Random message 3: David Tennant is iconic.");
+  }
+  
+  @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    response.setContentType("text/html;");
-    response.getWriter().println("Hello Kenzie!");
+    String json = createJSON();
+    response.setContentType("application/json;");
+    response.getWriter().println(json);
+  }
+
+  private String createJSON(){
+      String json = "{\"messages\":[";
+      json += "\"";
+      json += messages.get(0);
+      json += "\"";
+      json += ", ";
+      json += "\"";
+      json += messages.get(1);
+      json +="\"";
+      json += ", ";
+      json += "\"";
+      json += messages.get(2);
+      json +="\"";
+      json += "]}";
+      return json;
   }
 }
