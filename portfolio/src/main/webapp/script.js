@@ -56,3 +56,9 @@ function addDataToDom(data) {
   const quoteContainer = document.getElementById('quote-container');
   quoteContainer.innerText = data;
 }
+
+function createComment(text) {
+  const liElement = document.createElement('li');
+  liElement.innerText = text;
+  return liElement;
+}

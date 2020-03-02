@@ -25,22 +25,39 @@ import java.util.List;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.gson.Gson;
+import javax.servlet.annotation.WebServlet;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
+   @Override
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
+
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    PreparedQuery results = datastore.prepare(query);
+
+    List<String> messages = new ArrayList<>();
+    for (Entity entity : results.asIterable()) {
+      long id = entity.getKey().getId();
+      String title = (String) entity.getProperty("comment");
+
+      messages.add(title);
+    }
+    
+    Gson gson = new Gson();
+    
+    response.setContentType("application/json;");
+    response.getWriter().println(gson.toJson(messages));
+  }
+  
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Get the input from the form.
-    String text = getParameter(request, "text-input", "");
-
-    // Break the text into individual words.
-    String[] words = text.split("\\s*,\\s*");
-
-    // Respond with the result.
-    response.setContentType("text/html;");
-    response.getWriter().println(Arrays.toString(words));
 
     //Datastore Comments
     String title = request.getParameter("title");
