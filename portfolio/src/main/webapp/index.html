@@ -29,14 +29,26 @@
        <a href="https://www.linkedin.com/in/kenzie-glass-14461019a/">LinkedIn</a>
        <a href="https://twitter.com/KenzieGlass2013">Twitter</a>
        <br>
-       <button onclick="addDataContent()">Click Here</button>
-       <div id="quote-container"></div>
-      <h1>Leave a Comment!</h1>
+
+      <p> Click the button below to sign in or logout! </p>
+      <body onload="loginIn(); getComment();">
+       <form action="/Login" method="GET">
+        <div id="hidelogin">
+        <input type="submit" class ="login" value="Login" />
+        </div>
+        <div id="showlogout">
+        <input type="submit" class="logout" value="Logout"/>
+        </div>
+       </form>
+      </body>
+       <div id="hideorshow">
+       <h1>Leave a Comment!</h1>
        <form action="/data" method="POST">
        <textarea name="text-input"></textarea>
        <br/><br/>
        <input type="submit" />
       </form>
+      <p id="comment-login-info"></p>
     </div>
   </body>
 </html>

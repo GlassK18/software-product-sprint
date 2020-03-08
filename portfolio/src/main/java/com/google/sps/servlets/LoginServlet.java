@@ -38,56 +38,44 @@ public class LoginServlet extends HttpServlet {
     PrintWriter out = response.getWriter();
     out.println("<h1>Login</h1>");
 
-    // Only logged-in users can see the form
+    // If user is not logged in, show a login form (could also redirect to a login page)
     UserService userService = UserServiceFactory.getUserService();
-    if (userService.isUserLoggedIn()) {
-      out.println("<p>Hello " + userService.getCurrentUser().getEmail() + "!</p>");
-      out.println("<p>Type a message and click submit:</p>");
-      out.println("<form method=\"POST\" action=\"/Login\">");
-      out.println("<textarea name=\"text\"></textarea>");
-      out.println("<br/>");
-      out.println("<button>Submit</button>");
-      out.println("</form>");
+    if (!userService.isUserLoggedIn()) {
+      String userEmail = userService.getCurrentUser().getEmail();
+      String urlToRedirectToAfterUserLogsOut = "/";
+      String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
+      
+      response.getWriter().println("Hello " + userEmail + "!");
+      response.getWriter().println("<p>Logout <a href=\"" + logoutUrl + "\">here</a>.</p>");
     } else {
-      String loginUrl = userService.createLoginURL("/Login");
-      out.println("<p>Login <a href=\"" + loginUrl + "\">here</a>.</p>");
-    }
+      String urlToRedirectToAfterUserLogsIn = "/";
+      String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
 
-    // Everybody can see the messages
-    out.println("<ul>");
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Query query = new Query("Message").addSort("timestamp", SortDirection.DESCENDING);
-    PreparedQuery results = datastore.prepare(query);
-    for (Entity entity : results.asIterable()) {
-      String text = (String) entity.getProperty("text");
-      String email = (String) entity.getProperty("email");
-      out.println("<li>" + email + ": " + text + "</li>");
+      response.getWriter().println("Sign in to leave a comment.");
+      response.getWriter().println("<p>Login <a href=\"" + loginUrl + "\">here</a>.</p>");  
     }
-    out.println("</ul>");
+   
   }
 
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    UserService userService = UserServiceFactory.getUserService();
+      UserService userService = UserServiceFactory.getUserService();
 
-    // Only logged-in users can post messages
-    if (!userService.isUserLoggedIn()) {
-      response.sendRedirect("/index.html");
-      return;
+    response.setContentType("application/json");
+
+    Boolean isLoggedIn = userService.isUserLoggedIn();
+    String url = "";
+    if (isLoggedIn){
+      url = userService.createLogoutURL("/");
+    } else {
+      url = userService.createLoginURL("/");
     }
 
-    String text = request.getParameter("text");
-    String email = userService.getCurrentUser().getEmail();
+    String isLoggedInJson = "{ \"loginstatus\" : "
+      +isLoggedIn+", \"url\" : \""+url+"\" }";
 
-    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    Entity messageEntity = new Entity("Message");
-    messageEntity.setProperty("text", text);
-    messageEntity.setProperty("email", email);
-    messageEntity.setProperty("timestamp", System.currentTimeMillis());
-    datastore.put(messageEntity);
-
-    // Redirect to /shoutbox. The request will be routed to the doGet() function above.
-    response.sendRedirect("/index.html");
+    response.getWriter().println(isLoggedInJson);
+ 
   }
 }
