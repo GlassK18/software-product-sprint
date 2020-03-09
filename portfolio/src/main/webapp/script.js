@@ -62,3 +62,44 @@ function createComment(text) {
   liElement.innerText = text;
   return liElement;
 }
+
+async function getComment() {
+  const visibility = document.getElementById("hideorshow");
+  const hidelogin = document.getElementById("hidelogin");
+  const showlogout = document.getElementById("showlogout");
+  const login = await fetch('/Login');
+  const loginstatus = await login.text();
+  const loginName = loginstatus.split("<p");
+  if(loginName[0].includes("sign in to leave a comment.")){
+      visibility.style.display = "none";
+      hidelogin.style.display = "block";
+      showlogout.style.display ="none";
+  }else{
+   showlogout.style.display= "block";
+   hidelogin.style.display= "none";
+   visibility.style.display = "block";
+  const response = await fetch('/data');
+  const comments = await response.json();
+  const historyEl = document.getElementById('history');
+  for(let i = 0; i < comments.length; i++){
+    historyEl.appendChild(createListElement(comments[i]));
+  }
+
+  }  
+}
+
+async function loginIn() {
+  const response = await fetch('/Login');
+  const user = await response.text();
+  const username = user.split("<p");
+  const infoEl = document.getElementById('logininfo');
+  infoEl.appendChild(createListElement(username[0])); 
+}
+
+
+/** Creates an <li> element containing text. */
+function createListElement(text) {
+  const liElement = document.createElement('li');
+  liElement.innerText = text;
+  return liElement;
+}
