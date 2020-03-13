@@ -60,7 +60,7 @@ public class LoginServlet extends HttpServlet {
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-      UserService userService = UserServiceFactory.getUserService();
+    UserService userService = UserServiceFactory.getUserService();
 
     response.setContentType("application/json");
 
@@ -71,11 +71,10 @@ public class LoginServlet extends HttpServlet {
     } else {
       url = userService.createLoginURL("/");
     }
-
-    String isLoggedInJson = "{ \"loginstatus\" : "
-      +isLoggedIn+", \"url\" : \""+url+"\" }";
-
-    response.getWriter().println(isLoggedInJson);
  
   }
+  // Contstucts a Json formatted object with information to be returned to the client
+    private String createJsonObject(String isLoggedIn, String email, String link){
+       return "{\"isLoggedIn\":\"" + isLoggedIn + "\", \"email\":\"" + email + "\", \"link\":\"" + link + "\"}";
+    }
 }
