@@ -73,6 +73,7 @@ public class LoginServlet extends HttpServlet {
     }
  
   }
+  
   // Contstucts a Json formatted object with information to be returned to the client
     private String createJsonObject(String isLoggedIn, String email, String link){
        return "{\"isLoggedIn\":\"" + isLoggedIn + "\", \"email\":\"" + email + "\", \"link\":\"" + link + "\"}";
