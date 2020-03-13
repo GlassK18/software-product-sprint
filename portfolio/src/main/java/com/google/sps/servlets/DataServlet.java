@@ -28,47 +28,55 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gson.Gson;
 import javax.servlet.annotation.WebServlet;
 
 /** Servlet that returns some example content. TODO: modify this file to handle comments data */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
+    private ArrayList<String> comments = new ArrayList<String>();
 
    @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    Query query = new Query("Comment").addSort("timestamp", SortDirection.DESCENDING);
-
+    Query query = new Query("Comments").addSort("timestamp", SortDirection.DESCENDING);
+    query.addSort("username");
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     PreparedQuery results = datastore.prepare(query);
 
-    List<String> messages = new ArrayList<>();
+    List<String> commentsStored = new ArrayList<String>();
     for (Entity entity : results.asIterable()) {
-      long id = entity.getKey().getId();
-      String title = (String) entity.getProperty("comment");
+      String comment = (String) entity.getProperty("username") + " : " + (String) entity.getProperty("comment");
 
-      messages.add(title);
+      commentsStored.add(comment);
     }
     
     Gson gson = new Gson();
     
     response.setContentType("application/json;");
-    response.getWriter().println(gson.toJson(messages));
+    response.getWriter().println(gson.toJson(commentsStored));
   }
   
   @Override
   public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
     //Datastore Comments
-    String title = request.getParameter("title");
+    String comment = request.getParameter("text-input");
+    UserService userService = UserServiceFactory.getUserService();
+    Entity commentEntity = new Entity("Comments");
+    String username;
+    if (userService.isUserLoggedIn()){
+        username = userService.getCurrentUser().getEmail();
+        commentEntity.setProperty("username", username);
+    }
+    comments.add(comment);
     long timestamp = System.currentTimeMillis();
-
-    Entity taskEntity = new Entity("Task");
-    taskEntity.setProperty("title", title);
-    taskEntity.setProperty("timestamp", timestamp);
+    
+    commentEntity.setProperty("comment", comment);
+    commentEntity.setProperty("timestamp", timestamp);
 
     DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    datastore.put(taskEntity);
+    datastore.put(commentEntity);
 
     response.sendRedirect("/index.html");
   }
